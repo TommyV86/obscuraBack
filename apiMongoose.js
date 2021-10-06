@@ -4,6 +4,7 @@ const app = express();
 const copDb = require('./copDb')
 const mongoose = require('mongoose')
 const User = require('./models/userModel')
+const Id = require('mongodb').ObjectId
 
 // creation du serveur
 const port = http.createServer(app).listen(8080)
@@ -12,8 +13,7 @@ const port = http.createServer(app).listen(8080)
 const uri = copDb.copDbUri
 mongoose.connect(uri, {
     useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,   
+    useUnifiedTopology: true
 }).then(() => {
     console.log("----------------------------")
     console.log(" *** Database connected *** ")
@@ -62,6 +62,21 @@ app.get('/allUsers', async (req, res) => {
         res.status(400).json(users)
     } catch (err) {
         console.log(err)
+    }
+})
+
+app.delete('/deleteUser', async (req, res) => {
+
+    let reqBobyId = req.body._id
+    let id = Id(reqBobyId)
+    try {
+        const user = await User.deleteOne(id)
+        console.log(`*** user deleted ***`)
+        console.log(`*** id : ${id} ***`)
+        res.status(200).json('  user deleted  ')
+    } catch (err) {
+        console.log(" xxx failed delete xxx")
+        res.status(404).json(err)
     }
 })
 
