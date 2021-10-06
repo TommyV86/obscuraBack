@@ -2,10 +2,10 @@ const mongoose = require('mongoose')
 let crypto = require('crypto')
 
 const UserSchema = new mongoose.Schema({
-    firstName: {type: String, required: true},
-    lastName: {type: String, required: true},
-    email: {type: String, required: true},
-    token: {type: String, required: false}
+    firstName: String, required: true,
+    lastName: String, required: true,
+    email: String, required: true,
+    token: String, required: false
 })
 
 // Method to set salt and hash the password for a user 
@@ -21,4 +21,4 @@ UserSchema.methods.validPassword = (pswd) => {
 }
 
 
-module.exports = mongoose.model("object", UserSchema)
+module.exports = mongoose.model("user", UserSchema)

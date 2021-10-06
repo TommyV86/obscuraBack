@@ -24,7 +24,6 @@ mongoose.connect(uri, {
 app.use(express.json())
 
 app.post('/createCollec', async (req, res) => {
-
     try {
         await User.createCollection().then(() => {
             console.log(' *** Collection is created! ***')
@@ -39,15 +38,16 @@ app.post('/createCollec', async (req, res) => {
 app.post('/signUp', async (req, res) => {
     //les variables font office d'objet user
     let {firstName, lastName, email, token} = req.body
-    
+
     try {
-        const newUser = await User.create({ 
-            firstName, 
-            lastName, 
-            email, 
-            token
+        const newUser = await User.create({
+            firstName: firstName, 
+            lastName: lastName,
+            email: email, 
+            token: token
         })
         res.status(200).json(newUser)
+        console.log(" *** success ***")
     } catch (err) {
         console.log(" xxx failed xxx ")
         res.status(400).json(err)
