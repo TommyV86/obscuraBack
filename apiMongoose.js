@@ -56,7 +56,29 @@ app.get('/allUsers', async (req, res) => {
         console.log(' *** user finded *** ')
         res.status(400).json(users)
     } catch (err) {
-        console.log(err)
+        console.log(err.message)
+    }
+})
+
+app.put('/update', async (req, res) => {
+
+    let reqBobyId = req.body._id
+    let id = Id(reqBobyId)
+
+    let {firstName, lastName, email} = req.body
+
+    try {
+        const userUpdated = await User.findByIdAndUpdate(id, { 
+            firstName: firstName,
+            lastName: lastName,
+            email: email
+        })
+        console.log(`*** user with id ${id} updated ***`)
+        res.status(200).json(`${userUpdated.firstName} data's updated`)
+
+    } catch(e) {
+        console.log(' xxx update failed xxx')
+        res.status(404).json(e)
     }
 })
 
