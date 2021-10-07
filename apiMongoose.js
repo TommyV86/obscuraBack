@@ -5,6 +5,8 @@ const copDb = require('./copDb')
 const mongoose = require('mongoose')
 const User = require('./models/userModel')
 const Id = require('mongodb').ObjectId
+let crypto = require('crypto')
+
 
 // creation du serveur
 const port = http.createServer(app).listen(8080)
@@ -28,12 +30,15 @@ app.use(express.json())
 app.post('/signUp', async (req, res) => {
 
     let {firstName, lastName, email, token} = req.body
+    let pswd = req.body.passwordHash
+    let pswdHash = crypto.createHash('sha256').update(pswd).digest('hex')
 
     try {
         const newUser = await User.create({
             firstName: firstName, 
             lastName: lastName,
             email: email, 
+            passwordHash: pswdHash,
             token: token
         })
         res.status(200).json(newUser)
