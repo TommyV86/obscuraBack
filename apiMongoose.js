@@ -1,7 +1,7 @@
 const http = require('http')
 let express = require("express");
 const app = express();
-const copDb = require('./copDb')
+const copDb = require('./dbUri')
 const mongoose = require('mongoose')
 const User = require('./models/userModel')
 const Id = require('mongodb').ObjectId
@@ -31,7 +31,8 @@ app.post('/signUp', async (req, res) => {
 
     let {firstName, lastName, email, token} = req.body
     let pswd = req.body.passwordHash
-    let pswdHash = crypto.createHash('sha256').update(pswd).digest('hex')
+    let salt = crypto.randomBytes(16).toString('hex')
+    let pswdHash = crypto.createHmac('sha256', pswd).update(salt).digest('hex')
 
     try {
         const newUser = await User.create({
