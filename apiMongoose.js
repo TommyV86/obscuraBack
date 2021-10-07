@@ -16,6 +16,7 @@ mongoose.connect(uri, {
     useUnifiedTopology: true
 }).then(() => {
     console.log("----------------------------")
+    console.log(" Listen to port => " + port._connectionKey)
     console.log(" *** Database connected *** ")
     console.log("----------------------------")
 }).catch(err => console.log(err));
@@ -23,20 +24,9 @@ mongoose.connect(uri, {
 // retour des données json
 app.use(express.json())
 
-app.post('/createCollec', async (req, res) => {
-    try {
-        await User.createCollection().then(() => {
-            console.log(' *** Collection is created! ***')
-        })
-        res.status(200).json(" success ")
-    } catch (err) {
-        console.log(" xxx failed xxx ")
-        res.status(400).json(err)
-    }
-})
-
+// user routers part
 app.post('/signUp', async (req, res) => {
-    //les variables font office d'objet user
+
     let {firstName, lastName, email, token} = req.body
 
     try {
@@ -69,8 +59,9 @@ app.delete('/deleteUser', async (req, res) => {
 
     let reqBobyId = req.body._id
     let id = Id(reqBobyId)
+
     try {
-        const user = await User.deleteOne(id)
+        await User.deleteOne(id)
         console.log(`*** user deleted ***`)
         console.log(`*** id : ${id} ***`)
         res.status(200).json('  user deleted  ')
@@ -79,6 +70,3 @@ app.delete('/deleteUser', async (req, res) => {
         res.status(404).json(err)
     }
 })
-
-console.log("----------------------------------------------")
-console.log(" Listen to port => " + port._connectionKey)
