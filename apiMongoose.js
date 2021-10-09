@@ -27,7 +27,7 @@ mongoose.connect(uri, {
 app.use(express.json())
 
 // user routers part
-app.post('/signUp', async (req, res) => {
+app.post('/signIn', async (req, res) => {
 
     let {firstName, lastName, email, token} = req.body
     let pswd = req.body.passwordHash
@@ -54,7 +54,7 @@ app.get('/allUsers', async (req, res) => {
     
     try {
         const users = await User.find({})
-        console.log(' *** user finded *** ')
+        console.log(' *** users finded *** ')
         res.status(400).json(users)
     } catch (err) {
         console.log(err.message)
@@ -85,9 +85,9 @@ app.put('/update', async (req, res) => {
 
 app.delete('/deleteUser', async (req, res) => {
 
-    let reqBobyId = req.body._id
-    let id = Id(reqBobyId)
-
+    let reqBodyId = req.body._id
+    let id = Id(reqBodyId)
+    
     try {
         await User.deleteOne(id)
         console.log(`*** user deleted ***`)
