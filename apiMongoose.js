@@ -29,13 +29,14 @@ app.use(express.json())
 // user routers part
 app.post('/signIn', async (req, res) => {
 
-    let {firstName, lastName, email, token} = req.body
+    let {role, firstName, lastName, email, token} = req.body
     let pswd = req.body.passwordHash
     let salt = crypto.randomBytes(16).toString('hex')
     let pswdHash = crypto.createHmac('sha256', pswd).update(salt).digest('hex')
 
     try {
         const newUser = await User.create({
+            role: role,
             firstName: firstName, 
             lastName: lastName,
             email: email, 
