@@ -36,7 +36,7 @@ app.post('/signIn', async (req, res) => {
 
     try {
         const newUser = await User.create({
-            role: role,
+            role: 2,
             firstName: firstName, 
             lastName: lastName,
             email: email, 
