@@ -1,18 +1,17 @@
-const http = require('http')
+const http = require('http');
 let express = require("express");
 const app = express();
-const copDb = require('./dbUri')
-const mongoose = require('mongoose')
-const User = require('./models/userModel')
-const Id = require('mongodb').ObjectId
-let crypto = require('crypto')
-
+const obj = require('./objects');
+const mongoose = require('mongoose');
+const User = require('./models/userModel');
+const Id = require('mongodb').ObjectId;
+const bcrypt = require('bcryptjs');
 
 // creation du serveur
-const port = http.createServer(app).listen(8080)
+const port = http.createServer(app).listen(8080);
 
 // connection à la database
-const uri = copDb.copDbUri
+const uri = obj.copDbUri;
 mongoose.connect(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -24,50 +23,76 @@ mongoose.connect(uri, {
 }).catch(err => console.log(err));
 
 // retour des données json
-app.use(express.json())
+app.use(express.json());
 
 // user routers part
 app.post('/signIn', async (req, res) => {
 
-    let {role, firstName, lastName, email, token} = req.body
-    let pswd = req.body.passwordHash
-    let salt = crypto.randomBytes(16).toString('hex')
-    let pswdHash = crypto.createHmac('sha256', pswd).update(salt).digest('hex')
+    let {firstName, lastName, email, token} = req.body;
+
+    const emailExist = await User.findOne({ email: email})
+    if (emailExist) return res.status(400).json("email already exists")
+
+    //Hash password
+    let pswd = req.body.passwordHash;
+    let salt = await bcrypt.genSalt(10);
+    let pswdHash = await bcrypt.hash(pswd, salt);
 
     try {
         const newUser = await User.create({
-            role: 2,
+            role: obj.usualUser,
             firstName: firstName, 
             lastName: lastName,
             email: email, 
             passwordHash: pswdHash,
+            salt: salt,
             token: token
-        })
-        res.status(200).json(newUser)
-        console.log(" *** success ***")
+        });
+        res.status(200).json(newUser);
+        console.log(" *** success ***");
     } catch (err) {
-        console.log(" xxx failed xxx ")
-        res.status(400).json(err)
+        console.log(" xxx failed xxx ");
+        res.status(400).json(err);
+    }
+})
+
+app.post('/login', async (req, res) => {
+    let { email, password } = req.body;
+
+    try {
+        const user = await User.findOne({ email: email });
+        if (!user) return res.status(400).json("email doesn't exists");
+        
+        const validPswd = await bcrypt.compare(password, user.passwordHash);
+        if(!validPswd) {
+            return res.status(400).json("password is incorrect");
+        } else {
+            console.log("success login !");
+            res.status(200).json(`Welcome  ${user.email} !`);
+        }
+
+    } catch (err) {
+        console.log(err);
     }
 })
 
 app.get('/allUsers', async (req, res) => {
     
     try {
-        const users = await User.find({})
-        console.log(' *** users finded *** ')
-        res.status(400).json(users)
+        const users = await User.find({});
+        console.log(' *** users finded *** ');
+        res.status(400).json(users);
     } catch (err) {
-        console.log(err.message)
+        console.log(err.message);
     }
 })
 
 app.put('/update', async (req, res) => {
 
-    let reqBobyId = req.body._id
-    let id = Id(reqBobyId)
+    let reqBobyId = req.body._id;
+    let id = Id(reqBobyId);
 
-    let {firstName, lastName, email} = req.body
+    let {firstName, lastName, email} = req.body;
 
     try {
         const userUpdated = await User.findByIdAndUpdate(id, { 
@@ -75,27 +100,27 @@ app.put('/update', async (req, res) => {
             lastName: lastName,
             email: email
         })
-        console.log(`*** user with id ${id} updated ***`)
-        res.status(200).json(`${userUpdated.firstName} data's updated`)
+        console.log(`*** user with id ${id} updated ***`);
+        res.status(200).json(`${userUpdated.firstName} data's updated`);
 
     } catch(e) {
-        console.log(' xxx update failed xxx')
-        res.status(404).json(e)
+        console.log(' xxx update failed xxx');
+        res.status(404).json(e);
     }
 })
 
 app.delete('/deleteUser', async (req, res) => {
 
-    let reqBodyId = req.body._id
-    let id = Id(reqBodyId)
+    let reqBodyId = req.body._id;
+    let id = Id(reqBodyId);
     
     try {
-        await User.deleteOne(id)
-        console.log(`*** user deleted ***`)
-        console.log(`*** id : ${id} ***`)
-        res.status(200).json('  user deleted  ')
+        await User.deleteOne(id);
+        console.log(`*** user deleted ***`);
+        console.log(`*** id : ${id} ***`);
+        res.status(200).json('  user deleted  ');
     } catch (err) {
-        console.log(" xxx failed delete xxx")
-        res.status(404).json(err)
+        console.log(" xxx failed delete xxx");
+        res.status(404).json(err);
     }
 })
