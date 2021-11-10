@@ -111,16 +111,15 @@ app.put('/update', async (req, res) => {
 
 app.delete('/deleteUser', async (req, res) => {
 
-    let reqBodyId = req.body._id;
-    let id = Id(reqBodyId);
+    let id = Id(req.body._id);
     
     try {
-        await User.deleteOne(id);
+        await User.remove({ _id: id});
         console.log(`*** user deleted ***`);
         console.log(`*** id : ${id} ***`);
         res.status(200).json('  user deleted  ');
     } catch (err) {
         console.log(" xxx failed delete xxx");
-        res.status(404).json(err);
+        res.status(404).json(" failed delete ");
     }
 })
