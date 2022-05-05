@@ -26,12 +26,15 @@ mongoose.connect(uri, {
 app.use(express.json());
 
 // user routers part
-app.post('/signIn', async (req, res) => {
+app.post('/signUp', async (req, res) => {
 
     let {firstName, lastName, email, token} = req.body;
 
-    const emailExist = await User.findOne({ email: email})
-    if (emailExist) return res.status(400).json("email already exists")
+    const emailExist = await User.findOne({ email: email});
+    if (emailExist) {
+        console.log(` xxx email ${email} already exists xxx `);
+        return res.status(400).json(`email ${email} already exists`);
+    }
 
     //Hash password
     let pswd = req.body.passwordHash;
@@ -48,38 +51,44 @@ app.post('/signIn', async (req, res) => {
             salt: salt,
             token: token
         });
+        console.log(" *** success *** ");
         res.status(200).json(newUser);
-        console.log(" *** success ***");
     } catch (err) {
-        console.log(" xxx failed xxx ");
-        res.status(400).json(err);
+        console.log(err);
+        res.status(400).json(err);      
     }
 })
 
-app.post('/login', async (req, res) => {
+app.post('/signIn', async (req, res) => {
     let { email, password } = req.body;
 
     try {
         const user = await User.findOne({ email: email });
-        if (!user) return res.status(400).json("email doesn't exists");
+        if (!user) {
+            console.log(` xxx email ${email} doesn't exists xxx `);
+            return res.status(400).json(`email ${email} doesn't exists`);
+        }
         
         const validPswd = await bcrypt.compare(password, user.passwordHash);
         if(!validPswd) {
+            console.log("password is incorrect");
             return res.status(400).json("password is incorrect");
         } else {
             console.log("success login !");
-            res.status(200).json(`Welcome  ${user.email} !`);
+            res.status(200).json(`Welcome ${user.email} !`);
         }
 
     } catch (err) {
         console.log(err);
+        res.status(400).json(err);      
+
     }
 })
 
 app.get('/allUsers', async (req, res) => {
     
     try {
-        const users = await User.find({});
+        const users = await User.find();
         console.log(' *** users finded *** ');
         res.status(400).json(users);
     } catch (err) {
@@ -117,7 +126,7 @@ app.delete('/deleteUser', async (req, res) => {
         await User.remove({ _id: id});
         console.log(`*** user deleted ***`);
         console.log(`*** id : ${id} ***`);
-        res.status(200).json('  user deleted  ');
+        res.status(200).json(` user deleted -> ${id} `);
     } catch (err) {
         console.log(" xxx failed delete xxx");
         res.status(404).json(" failed delete ");
