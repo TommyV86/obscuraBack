@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
     role: { type: Number, required: true },
@@ -10,4 +10,4 @@ const UserSchema = new mongoose.Schema({
     token: { type: String, required: false}
 })
 
-module.exports = mongoose.model("user", UserSchema)
+module.exports = mongoose.model("user", UserSchema);
